@@ -1,6 +1,5 @@
 import io.restassured.response.Response;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static io.restassured.RestAssured.*;
 import static io.restassured.http.ContentType.JSON;
@@ -8,13 +7,18 @@ import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.text.IsEmptyString.emptyString;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+
 public class ApiTest extends TestBase {
+    String userEndPoint = "/api/users/";
+    String registerEndPoint = "/api/register/";
+    String loginEndPoint = "/api/login/";
     private static String userId;
     @Test
     @DisplayName("Получение списка пользователей с указанием номера страницы")
     void getListUsers(){
         String numberList = "2";
-        get("/api/users?page=" + numberList)
+        get(userEndPoint + "?page=" + numberList)
         .then()
                 .log().status()
                 .log().body()
@@ -25,6 +29,7 @@ public class ApiTest extends TestBase {
     }
 
     @Test
+    @Order(1)
     @DisplayName("Создание нового пользователя")
     void createUser () {
         String userData = "{\"name\": \"Menskaia\", \"job\": \"QA\"}";
@@ -32,7 +37,7 @@ public class ApiTest extends TestBase {
                 .body(userData)
                 .contentType(JSON)
         .when()
-                .post("/api/users")
+                .post(userEndPoint)
         .then()
                 .log().status()
                 .log().body()
@@ -46,6 +51,7 @@ public class ApiTest extends TestBase {
     }
 
     @Test
+    @Order(2)
     @DisplayName("Редактирования данных пользователя")
     void UpdateUser () {
 
@@ -54,8 +60,9 @@ public class ApiTest extends TestBase {
                 .pathParam("userId", userId)
                 .body(userData)
                 .contentType(JSON)
+                .log().uri()
         .when()
-                .put("/api/users/{userId}")
+                .put(userEndPoint + "{userId}")
         .then()
                 .log().status()
                 .log().body()
@@ -73,7 +80,7 @@ public class ApiTest extends TestBase {
                 .contentType(JSON)
                 .log().uri()
         .when()
-                .post("/api/register")
+                .post(registerEndPoint)
         .then()
                 .log().status()
                 .log().body()
@@ -90,7 +97,7 @@ public class ApiTest extends TestBase {
                 .body(authData)
                 .contentType(JSON)
         .when()
-                .post("/api/login")
+                .post(loginEndPoint)
         .then()
                 .log().status()
                 .log().body()
